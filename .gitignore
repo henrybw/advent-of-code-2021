@@ -19,3 +19,7 @@ day/**/input
 *.sx32fsl
 *.wx64fsl
 *.wx32fsl
+
+# macOS
+.DS_Store
+.Trashes
