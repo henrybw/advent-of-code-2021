@@ -1,3 +1,7 @@
+# player-specific input files
+day/**/input
+
+# common lisp generated files
 *.FASL
 *.fasl
 *.lisp-temp

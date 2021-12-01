@@ -4,4 +4,5 @@
   :license  "MIT"
   :serial t
   :components ((:file "package")
-               (:file "advent-of-code-2021")))
+               (:file "advent-of-code-2021")
+               (:file "day1")))
