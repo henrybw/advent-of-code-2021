@@ -3,6 +3,13 @@
 (defun ./ (path)
   (asdf:system-relative-pathname :advent-of-code-2021 path))
 
-(defun day-file (n file)
+(defun day-pathname (n path)
   (./ (make-pathname :directory (list :relative "day" (write-to-string n))
-                     :name file)))
+                     :name path)))
+
+(defgeneric parse (day input))
+
+(defmethod parse ((day integer) (input pathname))
+  (with-open-file (stream (day-pathname day input) :if-does-not-exist nil)
+    (when stream
+      (parse day stream))))
