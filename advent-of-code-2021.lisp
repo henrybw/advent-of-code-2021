@@ -13,3 +13,5 @@
   (with-open-file (stream (day-pathname day input) :if-does-not-exist nil)
     (when stream
       (parse day stream))))
+
+(defgeneric solve (day part input))
