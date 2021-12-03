@@ -17,6 +17,14 @@
                               (if (char= char #\1) 1 0))))
       bit-matrix)))
 
+(defun column-major-bits (bit-matrix col)
+  (let* ((rows (array-dimension bit-matrix 0))
+         (col-major (make-array rows :element-type 'bit)))
+    (loop for row from 0 below rows
+          for b = (bit bit-matrix row col)
+          do (setf (bit col-major row) b))
+    col-major))
+
 (defun most-common-bit (bits)
   (loop for b across bits
         count (= b 1) into ones
@@ -35,16 +43,13 @@
 ;; and epsilon rate, then multiply them together. What is the power consumption
 ;; of the submarine?
 (defmethod solve ((day (eql 3)) (part (eql 1)) input)
-  (destructuring-bind (rows cols) (array-dimensions input)
-    (let ((gamma (make-array cols :element-type 'bit)))
-      (dotimes (col cols)
-        (let ((col-major (make-array rows :element-type 'bit)))
-          (loop for row from 0 below rows
-                for b = (bit input row col)
-                do (setf (bit col-major row) b))
-          (setf (bit gamma col) (most-common-bit col-major))))
-      (let ((epsilon (bit-not gamma)))
-        (* (integer-from-bits gamma) (integer-from-bits epsilon))))))
+  (let* ((cols (array-dimension input 1))
+         (gamma (make-array cols :element-type 'bit)))
+    (dotimes (col cols)
+      (let ((col-major (column-major-bits input col)))
+        (setf (bit gamma col) (most-common-bit col-major))))
+    (let ((epsilon (bit-not gamma)))
+      (* (integer-from-bits gamma) (integer-from-bits epsilon)))))
 
 (let ((example (parse 3 "example")))
   (assert (= (solve 3 1 example) 198)))
