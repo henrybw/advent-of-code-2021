@@ -25,11 +25,31 @@
           do (setf (bit col-major row) b))
     col-major))
 
-(defun most-common-bit (bits)
+(defun row-major-bits (bit-matrix row)
+  (let* ((cols (array-dimension bit-matrix 1))
+         (row-major (make-array cols :element-type 'bit)))
+    (loop for col from 0 below cols
+          for b = (bit bit-matrix row col)
+          do (setf (bit row-major col) b))
+    row-major))
+
+(defun count-bits (bits)
   (loop for b across bits
         count (= b 1) into ones
         count (= b 0) into zeros
-        finally (return (if (> ones zeros) 1 0))))
+        finally (return (list ones zeros))))
+
+;; Returns DEFAULT if 1 and 0 are equally common.
+(defun most-common-bit (bits default)
+  (destructuring-bind (ones zeros) (count-bits bits)
+    (if (= ones zeros) default
+        (if (> ones zeros) 1 0))))
+
+;; Returns DEFAULT if 1 and 0 are equally common.
+(defun least-common-bit (bits default)
+  (destructuring-bind (ones zeros) (count-bits bits)
+    (if (= ones zeros) default
+        (if (< ones zeros) 1 0))))
 
 (defun integer-from-bits (bits)
   (reduce (lambda (a b) (+ (ash a 1) b)) bits))
@@ -47,13 +67,55 @@
          (gamma (make-array cols :element-type 'bit)))
     (dotimes (col cols)
       (let ((col-major (column-major-bits input col)))
-        (setf (bit gamma col) (most-common-bit col-major))))
+        (setf (bit gamma col) (most-common-bit col-major 1))))
     (let ((epsilon (bit-not gamma)))
       (* (integer-from-bits gamma) (integer-from-bits epsilon)))))
 
+;; To find oxygen generator rating, determine the most common value (0 or 1) in
+;; the current bit position, and keep only numbers with that bit in that
+;; position. If 0 and 1 are equally common, keep values with a 1 in the position
+;; being considered.
+;;
+;; To find CO2 scrubber rating, determine the least common value (0 or 1) in the
+;; current bit position, and keep only numbers with that bit in that position.
+;; If 0 and 1 are equally common, keep values with a 0 in the position being
+;; considered.
+;;
+;; Use the binary numbers in your diagnostic report to calculate the oxygen
+;; generator rating and CO2 scrubber rating, then multiply them together. What
+;; is the life support rating of the submarine?
+(defmethod solve ((day (eql 3)) (part (eql 2)) input)
+  (destructuring-bind (rows cols) (array-dimensions input)
+    (flet ((find-matching-number (which-common-bit default-bit)
+             (let ((numbers (loop for row from 0 below rows
+                                  collect (row-major-bits input row))))
+               (loop for col from 0 below cols
+                     until (= (length numbers) 1)
+                     do (let ((matrix (make-array (list (length numbers) cols)
+                                                  :element-type 'bit)))
+                          (loop for number in numbers
+                                for row from 0 below (length numbers)
+                                do (loop for b across number
+                                         for col from 0 below (length number)
+                                         do (setf (bit matrix row col) b)))
+                          (let* ((col-major (column-major-bits matrix col))
+                                 (common-bit (funcall which-common-bit
+                                                      col-major default-bit)))
+                            (setf numbers
+                                  (remove-if-not (lambda (n) (= (bit n col)
+                                                                common-bit))
+                                                 numbers)))))
+               (integer-from-bits (first numbers)))))
+
+      (let ((generator (find-matching-number #'most-common-bit 1))
+            (scrubber (find-matching-number #'least-common-bit 0)))
+        (* generator scrubber)))))
+
 (let ((example (parse 3 "example")))
-  (assert (= (solve 3 1 example) 198)))
+  (assert (= (solve 3 1 example) 198))
+  (assert (= (solve 3 2 example) 230)))
 
 (let ((input (parse 3 "input")))
   (when input
-    (format t "day3-part1: ~a~%" (solve 3 1 input))))
+    (format t "day3-part1: ~a~%" (solve 3 1 input))
+    (format t "day3-part2: ~a~%" (solve 3 2 input))))
