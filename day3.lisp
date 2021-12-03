@@ -17,6 +17,12 @@
                               (if (char= char #\1) 1 0))))
       bit-matrix)))
 
+(defun most-common-bit (bits)
+  (loop for b across bits
+        count (= b 1) into ones
+        count (= b 0) into zeros
+        finally (return (if (> ones zeros) 1 0))))
+
 (defun integer-from-bits (bits)
   (reduce (lambda (a b) (+ (ash a 1) b)) bits))
 
@@ -32,12 +38,11 @@
   (destructuring-bind (rows cols) (array-dimensions input)
     (let ((gamma (make-array cols :element-type 'bit)))
       (dotimes (col cols)
-        (loop for row from 0 below rows
-              for b = (bit input row col)
-              count (= b 1) into ones
-              count (= b 0) into zeros
-              finally (setf (bit gamma col)
-                            (if (> ones zeros) 1 0))))
+        (let ((col-major (make-array rows :element-type 'bit)))
+          (loop for row from 0 below rows
+                for b = (bit input row col)
+                do (setf (bit col-major row) b))
+          (setf (bit gamma col) (most-common-bit col-major))))
       (let ((epsilon (bit-not gamma)))
         (* (integer-from-bits gamma) (integer-from-bits epsilon))))))
 
