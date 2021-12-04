@@ -20,7 +20,7 @@
 (defun column-major-bits (bit-matrix col)
   (let* ((rows (array-dimension bit-matrix 0))
          (col-major (make-array rows :element-type 'bit)))
-    (loop for row from 0 below rows
+    (loop for row below rows
           for b = (bit bit-matrix row col)
           do (setf (bit col-major row) b))
     col-major))
@@ -28,7 +28,7 @@
 (defun row-major-bits (bit-matrix row)
   (let* ((cols (array-dimension bit-matrix 1))
          (row-major (make-array cols :element-type 'bit)))
-    (loop for col from 0 below cols
+    (loop for col below cols
           for b = (bit bit-matrix row col)
           do (setf (bit row-major col) b))
     row-major))
@@ -87,16 +87,16 @@
 (defmethod solve ((day (eql 3)) (part (eql 2)) input)
   (destructuring-bind (rows cols) (array-dimensions input)
     (flet ((find-matching-number (which-common-bit default-bit)
-             (let ((numbers (loop for row from 0 below rows
+             (let ((numbers (loop for row below rows
                                   collect (row-major-bits input row))))
-               (loop for col from 0 below cols
+               (loop for col below cols
                      until (= (length numbers) 1)
                      do (let ((matrix (make-array (list (length numbers) cols)
                                                   :element-type 'bit)))
                           (loop for number in numbers
-                                for row from 0 below (length numbers)
+                                for row below (length numbers)
                                 do (loop for b across number
-                                         for col from 0 below (length number)
+                                         for col below (length number)
                                          do (setf (bit matrix row col) b)))
                           (let* ((col-major (column-major-bits matrix col))
                                  (common-bit (funcall which-common-bit
