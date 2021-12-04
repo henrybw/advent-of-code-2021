@@ -1,0 +1,78 @@
+(in-package #:advent-of-code-2021)
+
+(require :asdf)
+
+;; The submarine has a bingo subsystem that automatically generates a random
+;; order in which to draw numbers and a random set of boards.
+(defmethod parse ((day (eql 4)) (input stream))
+  (let ((numbers (mapcar #'parse-integer
+                         (uiop:split-string (read-line input nil)
+                                            :separator ",")))
+        ;; each board is a blank line, followed by 5 lines with 5 numbers each
+        (boards (loop for blank = (read-line input nil) while blank
+                      collect (loop for i below 5
+                                    for line = (read-line input nil) while line
+                                    collect (with-input-from-string (row line)
+                                              (loop for n = (read row nil nil)
+                                                    while n collect n))))))
+    (list numbers boards)))
+
+(defun mark-board (target board state)
+  (loop for board-row in board
+        for row below (length board)
+        do (loop for num in board-row
+                 for col below (length board-row)
+                 when (= num target)
+                   do (setf (aref state row col) t))))
+
+(defun winning-board-p (state)
+  (destructuring-bind (rows cols) (array-dimensions state)
+    (loop for row below rows
+          do (loop for col below cols
+                   always (aref state row col)
+                   finally (return-from winning-board-p t)))
+    (loop for col below cols
+          do (loop for row below rows
+                   always (aref state row col)
+                   finally (return-from winning-board-p t)))))
+
+(defun find-winner (numbers boards states)
+  (dolist (target numbers)
+    (let ((winner (loop for board in boards
+                        for state in states
+                        do (mark-board target board state)
+                        when (winning-board-p state)
+                          do (return (list target board state)))))
+      (when winner
+        (return winner)))))
+
+(defun sum-unmarked (board state)
+  (loop for board-row in board
+        for row below (length board)
+        sum (loop for num in board-row
+                  for col below (length board-row)
+                  when (not (aref state row col))
+                    sum num)
+          into total
+        finally (return total)))
+
+;; The score of the winning board is calculated by finding the sum of all
+;; unmarked numbers, then multiplying that sum by the number that was just
+;; called when the board won. To guarantee victory against the giant squid,
+;; figure out which board will win first. What will your final score be if you
+;; choose that board?
+(defmethod solve ((day (eql 4)) (part (eql 1)) input)
+  (destructuring-bind (numbers boards) input
+    (let ((states (loop for i below (length boards)
+                        collect (make-array '(5 5) :element-type 'boolean
+                                                   :initial-element nil))))
+      (destructuring-bind (last-number board state)
+          (find-winner numbers boards states)
+        (* last-number (sum-unmarked board state))))))
+
+(let ((example (parse 4 "example")))
+  (assert (= (solve 4 1 example) 4512)))
+
+(let ((input (parse 4 "input")))
+  (when input
+    (format t "day4-part1: ~a~%" (solve 4 1 input))))

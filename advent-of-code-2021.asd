@@ -7,4 +7,5 @@
                (:file "advent-of-code-2021")
                (:file "day1")
                (:file "day2")
-               (:file "day3")))
+               (:file "day3")
+               (:file "day4")))
