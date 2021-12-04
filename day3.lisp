@@ -40,16 +40,16 @@
         finally (return (list ones zeros))))
 
 ;; Returns DEFAULT if 1 and 0 are equally common.
-(defun most-common-bit (bits default)
+(defun common-bit (ones-zeros-cmp bits default)
   (destructuring-bind (ones zeros) (count-bits bits)
     (if (= ones zeros) default
-        (if (> ones zeros) 1 0))))
+        (if (funcall ones-zeros-cmp ones zeros) 1 0))))
 
-;; Returns DEFAULT if 1 and 0 are equally common.
+(defun most-common-bit (bits default)
+  (common-bit #'> bits default))
+
 (defun least-common-bit (bits default)
-  (destructuring-bind (ones zeros) (count-bits bits)
-    (if (= ones zeros) default
-        (if (< ones zeros) 1 0))))
+  (common-bit #'< bits default))
 
 (defun integer-from-bits (bits)
   (reduce (lambda (a b) (+ (ash a 1) b)) bits))
@@ -99,11 +99,10 @@
                                          for col below (length number)
                                          do (setf (bit matrix row col) b)))
                           (let* ((col-major (column-major-bits matrix col))
-                                 (common-bit (funcall which-common-bit
-                                                      col-major default-bit)))
+                                 (b (funcall which-common-bit col-major
+                                             default-bit)))
                             (setf numbers
-                                  (remove-if-not (lambda (n) (= (bit n col)
-                                                                common-bit))
+                                  (remove-if-not (lambda (n) (= (bit n col) b))
                                                  numbers)))))
                (integer-from-bits (first numbers)))))
 
