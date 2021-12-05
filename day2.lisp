@@ -2,8 +2,6 @@
 
 (defparameter *day* 2)
 
-(require :asdf)
-
 ;; Returns a list of (dx dy) pairs.
 (defmethod parse ((day (eql *day*)) (input stream))
   (flet ((parse-line (line)

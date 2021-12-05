@@ -1,7 +1,5 @@
 (in-package #:advent-of-code-2021)
 
-(require :asdf)
-
 (defparameter *day* 4)
 
 ;; The submarine has a bingo subsystem that automatically generates a random

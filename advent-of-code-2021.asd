@@ -3,6 +3,7 @@
   :author "Henry Baba-Weiss <henry.babaweiss@gmail.com>"
   :license  "MIT"
   :serial t
+  :depends-on (#:uiop)
   :components ((:file "package")
                (:file "advent-of-code-2021")
                (:file "day1")
