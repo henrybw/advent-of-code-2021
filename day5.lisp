@@ -28,9 +28,9 @@
     (dolist (segment segments)
       (destructuring-bind ((x1 y1) (x2 y2)) segment
         (loop for x = x1 then (if (= x1 x2) x
-                                  (if (> x2 x1) (incf x) (decf x)))
+                                  (if (< x1 x2) (incf x) (decf x)))
               for y = y1 then (if (= y1 y2) y
-                                  (if (> y2 y1) (incf y) (decf y)))
+                                  (if (< y1 y2) (incf y) (decf y)))
               do (incf (aref points x y))
               until (and (= x x2) (= y y2)))))
     (loop for i below (array-total-size points)
