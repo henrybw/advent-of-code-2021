@@ -4,20 +4,20 @@
 
 ;; Returns a 2D array of bits.
 (defmethod parse ((day (eql *day*)) (input stream))
-  (destructuring-bind (rows cols lines)
-      (loop for line = (read-line input nil) while line
-            count line into rows
-            maximize (length line) into cols
-            collect line into lines
-            finally (return (list rows cols lines)))
-    (let ((bit-matrix (make-array (list rows cols) :element-type 'bit)))
-      (loop for line in lines
-            count line into row
-            do (loop for char across line
-                     count char into col
-                     do (setf (bit bit-matrix (- row 1) (- col 1))
-                              (if (char= char #\1) 1 0))))
-      bit-matrix)))
+  (let ((lines (uiop:slurp-stream-lines input)))
+    (destructuring-bind (rows cols)
+        (loop for line in lines
+              count line into rows
+              maximize (length line) into cols
+              finally (return (list rows cols)))
+      (let ((bit-matrix (make-array (list rows cols) :element-type 'bit)))
+        (loop for line in lines
+              count line into row
+              do (loop for char across line
+                       count char into col
+                       do (setf (bit bit-matrix (- row 1) (- col 1))
+                                (if (char= char #\1) 1 0))))
+        bit-matrix))))
 
 (defun column-major-bits (bit-matrix col)
   (let* ((rows (array-dimension bit-matrix 0))

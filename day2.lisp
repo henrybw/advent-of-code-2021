@@ -11,7 +11,7 @@
                (cond ((string= direction "forward") (list value 0))
                      ((string= direction "down")    (list 0 value))
                      ((string= direction "up")      (list 0 (- value))))))))
-    (loop for line = (read-line input nil) while line
+    (loop for line in (uiop:slurp-stream-lines input)
           collect (parse-line line))))
 
 ;; It seems like the submarine can take a series of commands like "forward 1",

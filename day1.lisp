@@ -5,7 +5,7 @@
 ;; Each line is a measurement of the sea floor depth as the sweep looks further
 ;; and further away from the submarine.
 (defmethod parse ((day (eql *day*)) (input stream))
-  (loop for line = (read-line input nil) while line
+  (loop for line in (uiop:slurp-stream-lines input)
         collect (parse-integer line)))
 
 ;; Count the number of times a depth measurement increases from the previous
