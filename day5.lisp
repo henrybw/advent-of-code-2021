@@ -27,14 +27,12 @@
   (let ((points (make-array (bounds segments))))
     (dolist (segment segments)
       (destructuring-bind ((x1 y1) (x2 y2)) segment
-        (if (diagonalp segment)
-            (loop for x = x1 then (if (> x2 x1) (incf x) (decf x))
-                  for y = y1 then (if (> y2 y1) (incf y) (decf y))
-                  do (incf (aref points x y))
-                  until (and (= x x2) (= y y2)))
-            (loop for x from (min x1 x2) to (max x1 x2)
-                  do (loop for y from (min y1 y2) to (max y1 y2)
-                           do (incf (aref points x y)))))))
+        (loop for x = x1 then (if (= x1 x2) x
+                                  (if (> x2 x1) (incf x) (decf x)))
+              for y = y1 then (if (= y1 y2) y
+                                  (if (> y2 y1) (incf y) (decf y)))
+              do (incf (aref points x y))
+              until (and (= x x2) (= y y2)))))
     (loop for i below (array-total-size points)
           count (> (row-major-aref points i) 1))))
 
