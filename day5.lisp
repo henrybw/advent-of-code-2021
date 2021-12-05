@@ -19,26 +19,39 @@
         maximize (max y1 y2) into height
         finally (return (mapcar #'1+ (list width height)))))
 
-;; Consider only horizontal and vertical lines. At how many points do at least
-;; two lines overlap?
-(defmethod solve ((day (eql *day*)) (part (eql 1)) input)
-  (let* ((nondiagonals (remove-if-not (lambda (segment)
-                                        (destructuring-bind ((x1 y1) (x2 y2))
-                                            segment
-                                          (or (= x1 x2) (= y1 y2))))
-                                      input))
-         (points (make-array (bounds nondiagonals))))
-    (dolist (segment nondiagonals)
+(defun diagonalp (segment)
+  (destructuring-bind ((x1 y1) (x2 y2)) segment
+    (not (or (= x1 x2) (= y1 y2)))))
+
+(defun overlapping-points (segments)
+  (let ((points (make-array (bounds segments))))
+    (dolist (segment segments)
       (destructuring-bind ((x1 y1) (x2 y2)) segment
-        (loop for x from (min x1 x2) to (max x1 x2)
-              do (loop for y from (min y1 y2) to (max y1 y2)
-                       do (incf (aref points x y))))))
+        (if (diagonalp segment)
+            (loop for x = x1 then (if (> x2 x1) (incf x) (decf x))
+                  for y = y1 then (if (> y2 y1) (incf y) (decf y))
+                  do (incf (aref points x y))
+                  until (and (= x x2) (= y y2)))
+            (loop for x from (min x1 x2) to (max x1 x2)
+                  do (loop for y from (min y1 y2) to (max y1 y2)
+                           do (incf (aref points x y)))))))
     (loop for i below (array-total-size points)
           count (> (row-major-aref points i) 1))))
 
+;; Consider only horizontal and vertical lines. At how many points do at least
+;; two lines overlap?
+(defmethod solve ((day (eql *day*)) (part (eql 1)) input)
+  (overlapping-points (remove-if #'diagonalp input)))
+
+;; Consider all of the lines. At how many points do at least two lines overlap?
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
+  (overlapping-points input))
+
 (let ((example (parse *day* "example")))
-  (assert (= (solve *day* 1 example) 5)))
+  (assert (= (solve *day* 1 example) 5))
+  (assert (= (solve *day* 2 example) 12)))
 
 (let ((input (parse *day* "input")))
   (when input
-    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))
