@@ -1,7 +1,9 @@
 (in-package #:advent-of-code-2021)
 
+(defparameter *day* 3)
+
 ;; Returns a 2D array of bits.
-(defmethod parse ((day (eql 3)) (input stream))
+(defmethod parse ((day (eql *day*)) (input stream))
   (destructuring-bind (rows cols lines)
       (loop for line = (read-line input nil) while line
             count line into rows
@@ -62,7 +64,7 @@
 ;; Use the binary numbers in your diagnostic report to calculate the gamma rate
 ;; and epsilon rate, then multiply them together. What is the power consumption
 ;; of the submarine?
-(defmethod solve ((day (eql 3)) (part (eql 1)) input)
+(defmethod solve ((day (eql *day*)) (part (eql 1)) input)
   (let* ((cols (array-dimension input 1))
          (gamma (make-array cols :element-type 'bit)))
     (dotimes (col cols)
@@ -84,7 +86,7 @@
 ;; Use the binary numbers in your diagnostic report to calculate the oxygen
 ;; generator rating and CO2 scrubber rating, then multiply them together. What
 ;; is the life support rating of the submarine?
-(defmethod solve ((day (eql 3)) (part (eql 2)) input)
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
   (destructuring-bind (rows cols) (array-dimensions input)
     (flet ((find-matching-number (which-common-bit default-bit)
              (let ((numbers (loop for row below rows
@@ -110,11 +112,11 @@
             (scrubber (find-matching-number #'least-common-bit 0)))
         (* generator scrubber)))))
 
-(let ((example (parse 3 "example")))
-  (assert (= (solve 3 1 example) 198))
-  (assert (= (solve 3 2 example) 230)))
+(let ((example (parse *day* "example")))
+  (assert (= (solve *day* 1 example) 198))
+  (assert (= (solve *day* 2 example) 230)))
 
-(let ((input (parse 3 "input")))
+(let ((input (parse *day* "input")))
   (when input
-    (format t "day3-part1: ~a~%" (solve 3 1 input))
-    (format t "day3-part2: ~a~%" (solve 3 2 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))

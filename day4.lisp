@@ -2,9 +2,11 @@
 
 (require :asdf)
 
+(defparameter *day* 4)
+
 ;; The submarine has a bingo subsystem that automatically generates a random
 ;; order in which to draw numbers and a random set of boards.
-(defmethod parse ((day (eql 4)) (input stream))
+(defmethod parse ((day (eql *day*)) (input stream))
   (let ((numbers (mapcar #'parse-integer
                          (uiop:split-string (read-line input nil)
                                             :separator ",")))
@@ -93,20 +95,20 @@
 
 ;; To guarantee victory against the giant squid, figure out which board will win
 ;; first. What will your final score be if you choose that board?
-(defmethod solve ((day (eql 4)) (part (eql 1)) input)
+(defmethod solve ((day (eql *day*)) (part (eql 1)) input)
   (winning-board-score #'find-first-winner input))
 
 ;; On the other hand, it might be wise to try a different strategy: let the
 ;; giant squid win. Figure out which board will win last. Once it wins, what
 ;; would its final score be?
-(defmethod solve ((day (eql 4)) (part (eql 2)) input)
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
   (winning-board-score #'find-last-winner input))
 
-(let ((example (parse 4 "example")))
-  (assert (= (solve 4 1 example) 4512))
-  (assert (= (solve 4 2 example) 1924)))
+(let ((example (parse *day* "example")))
+  (assert (= (solve *day* 1 example) 4512))
+  (assert (= (solve *day* 2 example) 1924)))
 
-(let ((input (parse 4 "input")))
+(let ((input (parse *day* "input")))
   (when input
-    (format t "day4-part1: ~a~%" (solve 4 1 input))
-    (format t "day4-part2: ~a~%" (solve 4 2 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))
