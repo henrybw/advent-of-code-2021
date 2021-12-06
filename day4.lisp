@@ -65,7 +65,7 @@
               ;; copy the board state as it was when the win occurred
               (dotimes (i (array-total-size state))
                 (setf (row-major-aref state-copy i) (row-major-aref state i)))
-              (pushnew (list target board state-copy) last-winners)
+              (push (list target board state-copy) last-winners)
               (pushnew board won-boards))))))
     (first last-winners)))
 
