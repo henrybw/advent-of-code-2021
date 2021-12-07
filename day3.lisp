@@ -5,11 +5,11 @@
 ;; Returns a 2D array of bits.
 (defmethod parse ((day (eql *day*)) (input stream))
   (let ((lines (uiop:slurp-stream-lines input)))
-    (destructuring-bind (rows cols)
+    (multiple-value-bind (rows cols)
         (loop for line in lines
               count line into rows
               maximize (length line) into cols
-              finally (return (list rows cols)))
+              finally (return (values rows cols)))
       (let ((bit-matrix (make-array (list rows cols) :element-type 'bit)))
         (loop for line in lines
               count line into row
@@ -39,11 +39,11 @@
   (loop for b across bits
         count (= b 1) into ones
         count (= b 0) into zeros
-        finally (return (list ones zeros))))
+        finally (return (values ones zeros))))
 
 ;; Returns DEFAULT if 1 and 0 are equally common.
 (defun common-bit (ones-zeros-cmp bits default)
-  (destructuring-bind (ones zeros) (count-bits bits)
+  (multiple-value-bind (ones zeros) (count-bits bits)
     (if (= ones zeros) default
         (if (funcall ones-zeros-cmp ones zeros) 1 0))))
 
