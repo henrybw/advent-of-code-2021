@@ -71,9 +71,16 @@
   (let ((levels (alexandria:copy-array input)))
     (loop repeat 100 sum (energy-step levels))))
 
+;; What is the first step during which all octopuses flash?
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
+  (let ((levels (alexandria:copy-array input)))
+    (loop count t until (= (energy-step levels) (array-total-size levels)))))
+
 (let ((example (parse *day* "example")))
-  (assert (= (solve *day* 1 example) 1656)))
+  (assert (= (solve *day* 1 example) 1656))
+  (assert (= (solve *day* 2 example) 195)))
 
 (let ((input (parse *day* "input")))
   (when input
-    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))
