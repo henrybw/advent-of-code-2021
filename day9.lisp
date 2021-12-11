@@ -4,15 +4,7 @@
 
 ;; Returns a 2D matrix of integers representing the given heightmap.
 (defmethod parse ((day (eql *day*)) (input stream))
-  (let* ((lines (uiop:slurp-stream-lines input))
-         (rows (length lines))
-         (cols (length (first lines)))
-         (heightmap (make-array (list rows cols))))
-    (loop for line in lines for row below rows
-          do (loop for char across line for col below cols
-                   do (setf (aref heightmap row col)
-                            (parse-integer (string char)))))
-    heightmap))
+  (parse-matrix (uiop:slurp-stream-lines input)))
 
 ;; Returns all points in HEIGHTMAP that are to the up, down, left, and right of
 ;; the given point at ROW, COL.

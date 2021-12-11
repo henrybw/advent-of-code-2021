@@ -7,6 +7,18 @@
   (./ (make-pathname :directory (list :relative "day" (write-to-string n))
                      :name path)))
 
+;; Returns a 2D matrix of integers from the given list of strings LINES, each
+;; line consisting of digit characters.
+(defun parse-matrix (lines)
+  (let* ((rows (length lines))
+         (cols (length (first lines)))
+         (matrix (make-array (list rows cols))))
+    (loop for line in lines for row below rows
+          do (loop for char across line for col below cols
+                   do (setf (aref matrix row col)
+                            (parse-integer (string char)))))
+    matrix))
+
 ;; Returns all points in the 2D array MATRIX that are adjacent to the given
 ;; point at ROW, COL using the given list of DIRECTIONS, where each direction is
 ;; a pair of (ROW-OFFSET COL-OFFSET) offsets.

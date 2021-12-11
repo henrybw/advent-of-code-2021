@@ -4,15 +4,7 @@
 
 ;; Returns a 2D matrix of integers representing the octopus energy levels.
 (defmethod parse ((day (eql *day*)) (input stream))
-  (let* ((lines (uiop:slurp-stream-lines input))
-         (rows (length lines))
-         (cols (length (first lines)))
-         (levels (make-array (list rows cols))))
-    (loop for line in lines for row below rows
-          do (loop for char across line for col below cols
-                   do (setf (aref levels row col)
-                            (parse-integer (string char)))))
-    levels))
+  (parse-matrix (uiop:slurp-stream-lines input)))
 
 ;; Returns all points in LEVELS that are adjacent (including diagonals) to the
 ;; given point at ROW, COL.
