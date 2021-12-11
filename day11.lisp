@@ -16,15 +16,10 @@
 
 ;; Returns all points in LEVELS that are adjacent (including diagonals) to the
 ;; given point at ROW, COL.
-(defun adjacent-points (levels row col)
-  (destructuring-bind (rows cols) (array-dimensions levels)
-    (loop for (row-offset col-offset) in '((-1 -1) (-1 0) (-1 1) (0 -1) (0 1)
-                                           (1 -1) (1 0) (1 1))
-          for adj-row = (+ row row-offset)
-          for adj-col = (+ col col-offset)
-          unless (or (minusp adj-row) (minusp adj-col)
-                     (>= adj-row rows) (>= adj-col cols))
-            collect (list adj-row adj-col))))
+(defun neighbors (levels row col)
+  (adjacent-points levels row col '((-1 -1) (-1 0) (-1 1)
+                                    (0 -1) (0 1)
+                                    (1 -1) (1 0) (1 1))))
 
 ;; During a single step, the following occurs:
 ;;
@@ -47,7 +42,7 @@
                        thereis (and (> (row-major-aref levels i) 9)
                                     (not (row-major-aref flashed i)))))
              (inc-adjacent (row col)
-               (loop for (adj-row adj-col) in (adjacent-points levels row col)
+               (loop for (adj-row adj-col) in (neighbors levels row col)
                      unless (aref flashed adj-row adj-col)
                        do (incf (aref levels adj-row adj-col))))
              (propagate-flashes ()

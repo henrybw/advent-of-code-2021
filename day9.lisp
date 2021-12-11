@@ -16,21 +16,15 @@
 
 ;; Returns all points in HEIGHTMAP that are to the up, down, left, and right of
 ;; the given point at ROW, COL.
-(defun adjacent-points (heightmap row col)
-  (destructuring-bind (rows cols) (array-dimensions heightmap)
-    (loop for (row-offset col-offset) in '((-1 0) (1 0) (0 -1) (0 1))
-          for adj-row = (+ row row-offset)
-          for adj-col = (+ col col-offset)
-          unless (or (minusp adj-row) (minusp adj-col)
-                     (>= adj-row rows) (>= adj-col cols))
-            collect (list adj-row adj-col))))
+(defun adjacent-cardinal (heightmap row col)
+  (adjacent-points heightmap row col '((-1 0) (1 0) (0 -1) (0 1))))
 
 ;; Your first goal is to find the low points - the locations that are lower than
 ;; any of its adjacent locations.
 (defun low-point-p (heightmap row col)
   (let ((this-value (aref heightmap row col))
-        (adjacent (loop for (row col) in (adjacent-points heightmap row col)
-                         collect (aref heightmap row col))))
+        (adjacent (loop for (row col) in (adjacent-cardinal heightmap row col)
+                        collect (aref heightmap row col))))
     (every (lambda (x) (< this-value x)) adjacent)))
 
 (defun find-low-points (heightmap)
@@ -55,7 +49,7 @@
                (destructuring-bind (row col) point
                  (unless (aref visited row col)
                    (let ((val (aref heightmap row col))
-                         (adjacents (adjacent-points heightmap row col)))
+                         (adjacents (adjacent-cardinal heightmap row col)))
                      (unless (= val 9)
                        (setf (aref visited row col) t)
                        (dolist (adjacent adjacents)

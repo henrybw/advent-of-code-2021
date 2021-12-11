@@ -7,6 +7,16 @@
   (./ (make-pathname :directory (list :relative "day" (write-to-string n))
                      :name path)))
 
+;; Returns all points in the 2D array MATRIX that are adjacent to the given
+;; point at ROW, COL using the given list of DIRECTIONS, where each direction is
+;; a pair of (ROW-OFFSET COL-OFFSET) offsets.
+(defun adjacent-points (matrix row col directions)
+  (loop for (row-offset col-offset) in directions
+        for adj-row = (+ row row-offset)
+        for adj-col = (+ col col-offset)
+        when (array-in-bounds-p matrix adj-row adj-col)
+          collect (list adj-row adj-col)))
+
 (defgeneric parse (day input))
 
 (defmethod parse ((day integer) (input string))
