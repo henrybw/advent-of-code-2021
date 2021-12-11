@@ -3,7 +3,7 @@
   :author "Henry Baba-Weiss <henry.babaweiss@gmail.com>"
   :license  "MIT"
   :serial t
-  :depends-on (#:uiop)
+  :depends-on (#:uiop #:alexandria)
   :components ((:file "package")
                (:file "advent-of-code-2021")
                (:file "day1")
@@ -15,4 +15,5 @@
                (:file "day7")
                (:file "day8")
                (:file "day9")
-               (:file "day10")))
+               (:file "day10")
+               (:file "day11")))
