@@ -70,9 +70,26 @@
       (loop for i below (array-total-size grid)
             count (row-major-aref grid i)))))
 
+;; Finish folding the transparent paper according to the instructions. The
+;; manual says the code is always eight capital letters. What code do you use to
+;; activate the infrared thermal imaging camera system?
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
+  (destructuring-bind (grid folds) input
+    (loop for (fold-fn coord) in folds
+          do (setf grid (funcall fold-fn grid coord)))
+    (let ((pretty-grid (make-array (array-dimensions grid)
+                                   :element-type 'string :initial-element ".")))
+      (loop for i below (array-total-size grid)
+            when (row-major-aref grid i)
+              do (setf (row-major-aref pretty-grid i) "#"))
+      pretty-grid)))
+
 (let ((example (parse *day* "example")))
-  (assert (= (solve *day* 1 example) 17)))
+  (assert (= (solve *day* 1 example) 17))
+  ;; XXX part two relies on visual inspection, and thus isn't exactly testable
+  )
 
 (let ((input (parse *day* "input")))
   (when input
-    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))
