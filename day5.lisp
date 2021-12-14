@@ -9,9 +9,7 @@
         collect (mapcar (lambda (endpoint)
                           (mapcar #'parse-integer
                                   (uiop:split-string endpoint :separator ",")))
-                        ;; filter empty strings
-                        (remove-if (lambda (s) (= (length s) 0))
-                                   (uiop:split-string line :separator "->")))))
+                        (split-by line " -> "))))
 
 (defun bounds (segments)
   (loop for ((x1 y1) (x2 y2)) in segments

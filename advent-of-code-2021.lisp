@@ -37,3 +37,9 @@
         for adj-col = (+ col col-offset)
         when (array-in-bounds-p matrix adj-row adj-col)
           collect (list adj-row adj-col)))
+
+;; Splits the string STR separated by the substring SEPARATOR into a list of two
+;; strings: the substring before the separator and the substring after.
+(defun split-by (str separator)
+  (let ((start (search separator str)))
+    (list (subseq str 0 start) (subseq str (+ start (length separator))))))
