@@ -3,40 +3,46 @@
 (defparameter *day* 14)
 
 ;; Returns a list of (POLYMER-TEMPLATE PAIR-INSERTIONS), where POLYMER-TEMPLATE
-;; is a string, and PAIR-INSERTIONS is an association list of the form
-;; (PAIR . INSERTION), e.g. ("AB" . "C").
+;; is a string, and PAIR-INSERTIONS is hash table mapping pairs of characters,
+;; e.g. (#\A . #\B), to the character to insert between them.
 (defmethod parse ((day (eql *day*)) (input stream))
   (let* ((lines (uiop:slurp-stream-lines input))
          (polymer-template (first lines))
-         (pair-insertions (subseq lines 2)))
-    (list polymer-template
-          (mapcar (lambda (rule) (apply #'cons (split-by rule " -> ")))
-                  pair-insertions))))
+         (pair-insertions (make-hash-table :test #'equal)))
+    (mapcar (lambda (rule) (destructuring-bind (pair insertion)
+                               (split-by rule " -> ")
+                             (setf (gethash (cons (char pair 0) (char pair 1))
+                                            pair-insertions)
+                                   (char insertion 0))))
+            (subseq lines 2))
+    (list polymer-template pair-insertions)))
 
 (defun step-grow (polymer rules)
   (labels ((insert (a b rules)
-             (let* ((pair (format nil "~a~a" a b))
-                    (rule (assoc-if (lambda (key) (string= key pair)) rules)))
+             (let ((insertion (gethash (cons a b) rules)))
                ;; second char will be appended as A in the loop's next ON clause
-               (list (char pair 0) (when rule (cdr rule))))))
-    (format nil "~{~a~}" (loop for (a b) on (coerce polymer 'list)
-                               if b
-                                 append (insert a b rules)
-                               else
-                                 collect a))))
+               (if insertion
+                   (list a insertion)
+                   (list a)))))
+    (loop for (a b) on polymer
+          if b
+            append (insert a b rules)
+          else
+            collect a)))
 
 ;; Apply 10 steps of pair insertion to the polymer template and find the most
 ;; and least common elements in the result. What do you get if you take the
 ;; quantity of the most common element and subtract the quantity of the least
 ;; common element?
 (defmethod solve ((day (eql *day*)) (part (eql 1)) input)
-  (destructuring-bind (polymer rules) input
-    (dotimes (i 10)
-      (setf polymer (step-grow polymer rules)))
-    (loop for element across (remove-duplicates polymer)
-          maximize (count element polymer) into most
-          minimize (count element polymer) into least
-          finally (return (- most least)))))
+  (destructuring-bind (template rules) input
+    (let ((polymer (coerce template 'list)))
+      (dotimes (i 10)
+        (setf polymer (step-grow polymer rules)))
+      (loop for element in (remove-duplicates polymer)
+            maximize (count element polymer) into most
+            minimize (count element polymer) into least
+            finally (return (- most least))))))
 
 (let ((example (parse *day* "example")))
   (assert (= (solve *day* 1 example) 1588)))
