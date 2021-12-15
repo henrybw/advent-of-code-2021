@@ -43,3 +43,7 @@
 (defun split-by (str separator)
   (let ((start (search separator str)))
     (list (subseq str 0 start) (subseq str (+ start (length separator))))))
+
+;; Prints all key/value pairs in HASH-TABLE.
+(defun printhash (hash-table)
+  (maphash (lambda (k v) (format t "~a -> ~a~%" k v)) hash-table))
