@@ -17,18 +17,42 @@
             (subseq lines 2))
     (list polymer-template pair-insertions)))
 
-(defun step-grow (polymer rules)
-  (labels ((insert (a b rules)
-             (let ((insertion (gethash (cons a b) rules)))
-               ;; second char will be appended as A in the loop's next ON clause
-               (if insertion
-                   (list a insertion)
-                   (list a)))))
+(defun ensure-incf (table key)
+  (alexandria:ensure-gethash key table 0)
+  (incf (gethash key table)))
+
+(defun remove-decf (table key)
+  (if (= (gethash key table) 1)
+      (remhash key table)
+      (decf (gethash key table))))
+
+(defun most-least-diff-after (steps polymer rules)
+  (let ((elem-counts (make-hash-table))
+        (pair-counts (make-hash-table :test #'equal)))
+    (loop for elem in polymer
+          do (ensure-incf elem-counts elem))
     (loop for (a b) on polymer
-          if b
-            append (insert a b rules)
-          else
-            collect a)))
+          when b do (ensure-incf pair-counts (cons a b)))
+    (dotimes (i steps)
+      (let (pairs-inserted pairs-removed)
+        (loop for pair being the hash-key using (hash-value insertion) of rules
+              do (let ((occurs (gethash pair pair-counts)))
+                   (when occurs
+                     (let ((insertion (gethash pair rules)))
+                       (when insertion
+                         (dotimes (j occurs)
+                           (ensure-incf elem-counts insertion)
+                           (push (cons (car pair) insertion) pairs-inserted)
+                           (push (cons insertion (cdr pair)) pairs-inserted)
+                           (push pair pairs-removed)))))))
+        (dolist (pair pairs-inserted)
+          (ensure-incf pair-counts pair))
+        (dolist (pair pairs-removed)
+          (remove-decf pair-counts pair))))
+    (loop for occurs in (alexandria:hash-table-values elem-counts)
+          maximize occurs into most
+          minimize occurs into least
+          finally (return (- most least)))))
 
 ;; Apply 10 steps of pair insertion to the polymer template and find the most
 ;; and least common elements in the result. What do you get if you take the
@@ -37,12 +61,7 @@
 (defmethod solve ((day (eql *day*)) (part (eql 1)) input)
   (destructuring-bind (template rules) input
     (let ((polymer (coerce template 'list)))
-      (dotimes (i 10)
-        (setf polymer (step-grow polymer rules)))
-      (loop for element in (remove-duplicates polymer)
-            maximize (count element polymer) into most
-            minimize (count element polymer) into least
-            finally (return (- most least))))))
+      (most-least-diff-after 10 polymer rules))))
 
 (let ((example (parse *day* "example")))
   (assert (= (solve *day* 1 example) 1588)))
