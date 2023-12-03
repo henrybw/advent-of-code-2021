@@ -139,8 +139,9 @@
   (loop for (patterns digits) in input sum (decode patterns digits)))
 
 (with-input-from-string
-    (test (format nil "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ~
-                       ab | cdfeb fcadb cdfeb cdbaf"))
+    (test (format nil "~a~a"
+           "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | "
+           "cdfeb fcadb cdfeb cdbaf"))
   (destructuring-bind (patterns digits) (first (parse *day* test))
     (assert (= (decode patterns digits) 5353))))
 
