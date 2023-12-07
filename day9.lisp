@@ -6,11 +6,6 @@
 (defmethod parse ((day (eql *day*)) (input stream))
   (parse-matrix (uiop:slurp-stream-lines input)))
 
-;; Returns all points in HEIGHTMAP that are to the up, down, left, and right of
-;; the given point at ROW, COL.
-(defun adjacent-cardinal (heightmap row col)
-  (adjacent-points heightmap row col '((-1 0) (1 0) (0 -1) (0 1))))
-
 ;; Your first goal is to find the low points - the locations that are lower than
 ;; any of its adjacent locations.
 (defun low-point-p (heightmap row col)

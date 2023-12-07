@@ -38,6 +38,18 @@
         when (array-in-bounds-p matrix adj-row adj-col)
           collect (list adj-row adj-col)))
 
+;; Returns all points in the 2D array MATRIX that are to the up, down, left, and
+;; right of the given point at ROW, COL.
+(defun adjacent-cardinal (matrix row col)
+  (adjacent-points matrix row col '((-1 0) (1 0) (0 -1) (0 1))))
+
+;; Returns all points in the 2d array MATRIX that are adjacent (including
+;; diagonals) to the given point at ROW, COL.
+(defun adjacent-intercardinal (matrix row col)
+  (adjacent-points matrix row col '((-1 -1) (-1 0) (-1 1)
+                                    (0 -1) (0 1)
+                                    (1 -1) (1 0) (1 1))))
+
 ;; Splits the string STR separated by the substring SEPARATOR into a list of two
 ;; strings: the substring before the separator and the substring after.
 (defun split-by (str separator)

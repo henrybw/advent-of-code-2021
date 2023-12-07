@@ -6,13 +6,6 @@
 (defmethod parse ((day (eql *day*)) (input stream))
   (parse-matrix (uiop:slurp-stream-lines input)))
 
-;; Returns all points in LEVELS that are adjacent (including diagonals) to the
-;; given point at ROW, COL.
-(defun neighbors (levels row col)
-  (adjacent-points levels row col '((-1 -1) (-1 0) (-1 1)
-                                    (0 -1) (0 1)
-                                    (1 -1) (1 0) (1 1))))
-
 ;; During a single step, the following occurs:
 ;;
 ;;  - First, the energy level of each octopus increases by 1.
@@ -34,7 +27,8 @@
                        thereis (and (> (row-major-aref levels i) 9)
                                     (not (row-major-aref flashed i)))))
              (inc-adjacent (row col)
-               (loop for (adj-row adj-col) in (neighbors levels row col)
+               (loop for (adj-row adj-col)
+                       in (adjacent-intercardinal levels row col)
                      unless (aref flashed adj-row adj-col)
                        do (incf (aref levels adj-row adj-col))))
              (propagate-flashes ()
