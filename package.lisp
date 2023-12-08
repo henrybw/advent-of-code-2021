@@ -1,2 +1,2 @@
 (defpackage #:advent-of-code-2021
-  (:use #:cl))
+  (:use #:cl :pairing-heap))
