@@ -36,9 +36,49 @@
 (defmethod solve ((day (eql *day*)) (part (eql 1)) input)
   (minimize-risk input))
 
+(defun scale-map (map times)
+  ;; scaled value is original value + (tile-x + tile-y):
+  ;;
+  ;; 0,0     1,0     2,0     3,0      4,0
+  ;; 0,1     1,1     2,1     3,1      4,1
+  ;; 0,2     1,2     2,2     3,2      4,2
+  ;; 0,3     1,3     2,3     3,3      4,3
+  ;; 0,4     1,4     2,4     3,4      4,4
+  ;;
+  ;; +0   (0,0)
+  ;; +1   (0,1), (1,0)
+  ;; +2   (0,2), (1,1), (2,0)
+  ;; +3   (0,3), (1,2), (2,1), (3,0)
+  ;; +4   (0,4), (1,3), (2,2), (3,1), (4,0)
+  ;; +5   (1,4), (2,3), (3,2), (4,1)
+  ;; +6   (2,4), (3,3), (4,2)
+  ;; +7   (3,4), (4,3)
+  ;; +8   (4,4)
+  (let ((scaled (make-array (mapcar (lambda (x) (* x times))
+                                    (array-dimensions map)))))
+    (dotimes (tile-x times)
+      (dotimes (tile-y times)
+        (destructuring-bind (rows cols) (array-dimensions map)
+          (loop for row below rows
+                do (loop for col below cols
+                         do (let* ((scaled-row (+ (* tile-x rows) row))
+                                   (scaled-col (+ (* tile-y cols) col))
+                                   (orig-val (aref map row col))
+                                   (new-val (1+ (mod (+ (+ tile-x tile-y)
+                                                        (1- orig-val))
+                                                     9))))
+                              (setf (aref scaled scaled-row scaled-col)
+                                    new-val)))))))
+    scaled))
+
+(defmethod solve ((day (eql *day*)) (part (eql 2)) input)
+  (minimize-risk (scale-map input 5)))
+
 (let ((example (parse *day* "example")))
-  (assert (= (solve *day* 1 example) 40)))
+  (assert (= (solve *day* 1 example) 40))
+  (assert (= (solve *day* 2 example) 315)))
 
 (let ((input (parse *day* "input")))
   (when input
-    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))))
+    (format t "day~a-part1: ~a~%" *day* (solve *day* 1 input))
+    (format t "day~a-part2: ~a~%" *day* (solve *day* 2 input))))
